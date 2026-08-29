@@ -1,0 +1,67 @@
+@import "tailwindcss";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root {
+  /* Fonts (self-hosted — no build-time fetch to Google Fonts) */
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  /* Surfaces */
+  --color-paper: #f1eee6;
+  --color-paper-raised: #faf8f3;
+
+  /* Text */
+  --color-ink: #20241f;
+  --color-ink-soft: #5b6158;
+
+  /* Accents */
+  --color-highlight: #f4c518;
+  --color-highlight-soft: #fbedb0;
+  --color-teal: #1f6f63;
+  --color-teal-soft: #dbe9e5;
+
+  /* Structure */
+  --color-line: #d8d2c2;
+  --color-danger: #b3261e;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-raised: var(--color-paper-raised);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-soft: var(--color-highlight-soft);
+  --color-teal: var(--color-teal);
+  --color-teal-soft: var(--color-teal-soft);
+  --color-line: var(--color-line);
+  --color-danger: var(--color-danger);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Visible keyboard focus everywhere, styled to match the accent */
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
