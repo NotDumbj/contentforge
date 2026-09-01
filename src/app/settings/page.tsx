@@ -11,19 +11,19 @@ export default function SettingsPage() {
       </p>
 
       <div className="border-line bg-paper-raised mt-8 rounded-lg border p-5">
-        <label className="text-ink text-sm font-medium" htmlFor="model-key">
-          AI provider API key
+        <label className="text-ink text-sm font-medium block" htmlFor="model-key">
+          AI provider API key (Gemini)
         </label>
         <input
           id="model-key"
           type="password"
           disabled
-          placeholder="Set via OPENAI_API_KEY in your deployment's environment variables"
-          className="border-line bg-paper text-ink-soft placeholder:text-ink-soft mt-2 w-full rounded-md border px-3 py-2 text-sm"
+          aria-disabled="true"
+          placeholder="Set via GEMINI_API_KEY in your environment variables"
+          className="border-line bg-paper text-ink-soft placeholder:text-ink-soft/75 mt-2 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-teal"
         />
         <p className="text-ink-soft mt-2 text-xs">
-          Placeholder field — wiring this up to a real provider is Build-phase
-          work.
+          Read from <code className="font-mono">GEMINI_API_KEY</code> on the server. Never exposed to browser scripts.
         </p>
       </div>
     </div>

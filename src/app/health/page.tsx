@@ -47,7 +47,7 @@ export default async function HealthPage() {
         <div className="flex items-center gap-2">
           <span
             className={`h-2.5 w-2.5 rounded-full ${result.ok ? "bg-teal" : "bg-danger"}`}
-            aria-hidden
+            aria-hidden="true"
           />
           <span className="font-mono text-sm font-medium">
             {result.ok ? "OK — fetch succeeded" : "Fetch failed"}

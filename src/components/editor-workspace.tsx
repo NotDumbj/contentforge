@@ -120,6 +120,7 @@ export function EditorWorkspace({
 
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
+      <h1 className="sr-only">{title || "Draft Editor"}</h1>
       {/* Draft pane */}
       <div className="min-w-0 flex-1">
         {/* Status bar and Save action */}
@@ -129,7 +130,7 @@ export function EditorWorkspace({
               className={`h-2.5 w-2.5 rounded-full transition-colors ${
                 isDirty ? "bg-highlight" : "bg-teal"
               }`}
-              aria-hidden
+              aria-hidden="true"
             />
             <span className="text-ink-soft font-medium">
               {isDirty ? "Unsaved changes" : "Saved"}
@@ -151,7 +152,7 @@ export function EditorWorkspace({
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Untitled draft"
           aria-label="Draft title"
-          className="font-display placeholder:text-ink-soft/50 w-full border-none bg-transparent text-2xl font-semibold tracking-tight outline-none"
+          className="font-display placeholder:text-ink-soft/75 w-full border-none bg-transparent text-2xl font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-teal rounded-sm"
         />
         <div className="text-ink-soft font-mono mt-1 mb-4 text-xs">
           {wordCount} word{wordCount === 1 ? "" : "s"}
@@ -161,7 +162,7 @@ export function EditorWorkspace({
           onChange={(e) => setBody(e.target.value)}
           placeholder="Start writing, or ask the AI panel for a first pass…"
           aria-label="Draft body"
-          className="border-line bg-paper-raised placeholder:text-ink-soft/60 min-h-[50vh] w-full resize-y rounded-lg border p-4 text-[15px] leading-relaxed outline-none focus-visible:outline-none"
+          className="border-line bg-paper-raised placeholder:text-ink-soft/75 min-h-[50vh] w-full resize-y rounded-lg border p-4 text-[15px] leading-relaxed focus-visible:ring-2 focus-visible:ring-teal focus-visible:outline-none"
         />
       </div>
 
