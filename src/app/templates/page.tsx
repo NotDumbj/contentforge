@@ -1,5 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { TEMPLATES } from "@/lib/templates";
+
+export const metadata: Metadata = {
+  title: "Templates",
+  description:
+    "Browse prompt templates and starter skeletons for blog posts, social captions, and video scripts.",
+};
 
 export default function TemplatesPage() {
   return (

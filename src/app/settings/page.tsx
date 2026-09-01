@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Settings",
+  description: "Manage your AI model connection and application preferences.",
+};
+
 export default function SettingsPage() {
   return (
     <div className="mx-auto max-w-2xl">

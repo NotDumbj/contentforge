@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDraft, TYPE_LABEL, type DraftType } from "@/lib/drafts";
@@ -5,6 +6,32 @@ import { getTemplate } from "@/lib/templates";
 import { EditorWorkspace } from "@/components/editor-workspace";
 
 const NEW_TYPES: DraftType[] = ["blog", "social", "video"];
+
+export async function generateMetadata({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ template?: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const { template: templateId } = await searchParams;
+
+  if (id.startsWith("new-")) {
+    const type = id.replace("new-", "") as DraftType;
+    const template = getTemplate(templateId);
+    return {
+      title: template ? template.name : `New ${TYPE_LABEL[type] || type}`,
+      description: `Drafting workspace for ${template ? template.name : type}.`,
+    };
+  }
+
+  const draft = getDraft(id);
+  return {
+    title: draft ? draft.title : "Draft Editor",
+    description: draft ? draft.excerpt : "Edit your content draft with AI assist.",
+  };
+}
 
 export default async function EditorPage({
   params,

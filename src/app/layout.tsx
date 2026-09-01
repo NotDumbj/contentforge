@@ -2,9 +2,31 @@ import type { Metadata } from "next";
 import { SidebarNav } from "@/components/sidebar-nav";
 import "./globals.css";
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://contentforge.app";
+
 export const metadata: Metadata = {
-  title: "ContentForge",
-  description: "An AI-assisted studio for drafting blog posts, social captions, and video scripts.",
+  metadataBase: new URL(appUrl),
+  title: {
+    default: "ContentForge — AI Content Studio for Creators",
+    template: "%s | ContentForge",
+  },
+  description:
+    "An AI-assisted studio for creators to draft blog posts, social captions, and video scripts.",
+  openGraph: {
+    title: "ContentForge — AI Content Studio for Creators",
+    description:
+      "An AI-assisted studio for creators to draft blog posts, social captions, and video scripts.",
+    url: appUrl,
+    siteName: "ContentForge",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ContentForge — AI Content Studio for Creators",
+    description:
+      "An AI-assisted studio for creators to draft blog posts, social captions, and video scripts.",
+  },
 };
 
 export default function RootLayout({

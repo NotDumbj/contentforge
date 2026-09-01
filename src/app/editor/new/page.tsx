@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { TYPE_LABEL, type DraftType } from "@/lib/drafts";
+
+export const metadata: Metadata = {
+  title: "New Draft",
+  description: "Start a new blog post, social caption, or video script draft.",
+};
 
 const OPTIONS: { type: DraftType; description: string }[] = [
   { type: "blog", description: "Long-form posts with headings, intros, and a clear takeaway." },

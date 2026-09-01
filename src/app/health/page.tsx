@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
+
+export const metadata: Metadata = {
+  title: "Health Check",
+  description: "Real-time system health and runtime API status.",
+};
 
 export const dynamic = "force-dynamic";
 
