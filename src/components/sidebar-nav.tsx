@@ -14,11 +14,13 @@ export function SidebarNav() {
       aria-label="Primary"
       className="border-line bg-paper-raised flex shrink-0 flex-col gap-1 border-b p-3 md:h-full md:w-56 md:border-r md:border-b-0 md:p-5"
     >
-      <div className="mb-2 hidden md:block">
-        <span className="font-display text-ink text-xl font-semibold tracking-tight">
+      <div className="mb-2 flex items-baseline justify-between md:block">
+        <span className="font-display text-ink text-lg md:text-xl font-semibold tracking-tight">
           ContentForge
         </span>
-        <p className="text-ink-soft font-mono mt-1 text-xs">draft studio</p>
+        <span className="text-ink-soft font-mono ml-2 md:ml-0 md:mt-1 md:block text-xs">
+          draft studio
+        </span>
       </div>
       <ul className="flex flex-row flex-wrap gap-1 md:flex-col">
         {LINKS.map((link) => (

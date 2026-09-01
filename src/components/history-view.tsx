@@ -21,24 +21,26 @@ export function HistoryView() {
       ) : drafts.length === 0 ? (
         <p className="text-ink-soft mt-8 text-sm">No draft history found.</p>
       ) : (
-        <table className="mt-8 w-full text-left text-sm">
-          <thead>
-            <tr className="border-line text-ink-soft font-mono border-b text-xs uppercase">
-              <th className="py-2 font-medium">Draft</th>
-              <th className="py-2 font-medium">Status</th>
-              <th className="py-2 font-medium">Updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            {drafts.map((d) => (
-              <tr key={d.id} className="border-line border-b">
-                <td className="py-3 pr-4 font-medium">{d.title || "Untitled draft"}</td>
-                <td className="text-ink-soft py-3 pr-4">{d.status}</td>
-                <td className="text-ink-soft font-mono py-3">{d.updatedAt}</td>
+        <div className="mt-8 overflow-x-auto">
+          <table className="w-full text-left text-sm min-w-[480px]">
+            <thead>
+              <tr className="border-line text-ink-soft font-mono border-b text-xs uppercase">
+                <th className="py-2 font-medium">Draft</th>
+                <th className="py-2 font-medium">Status</th>
+                <th className="py-2 font-medium">Updated</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {drafts.map((d) => (
+                <tr key={d.id} className="border-line border-b">
+                  <td className="py-3 pr-4 font-medium">{d.title || "Untitled draft"}</td>
+                  <td className="text-ink-soft py-3 pr-4">{d.status}</td>
+                  <td className="text-ink-soft font-mono py-3">{d.updatedAt}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
