@@ -5,24 +5,6 @@ import { useRouter } from "next/navigation";
 import { useDrafts } from "@/lib/use-drafts";
 import type { DraftType } from "@/lib/drafts";
 
-const SUGGESTIONS: Record<DraftType, string[]> = {
-  blog: [
-    "Open with the reader's problem, not your product.",
-    "Tighten this paragraph — three sentences could be one.",
-    "Add a concrete example before the takeaway.",
-  ],
-  social: [
-    "Lead with the hook — the first line decides the scroll.",
-    "Try a question to invite comments.",
-    "Cut the hashtags to three, high-relevance ones.",
-  ],
-  video: [
-    "Front-load the payoff in the first 3 seconds.",
-    "Mark a beat for a visual change every 5–7 seconds.",
-    "End on a direct, single call to action.",
-  ],
-};
-
 export function EditorWorkspace({
   draftId,
   type,
@@ -43,7 +25,10 @@ export function EditorWorkspace({
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [panelOpen, setPanelOpen] = useState(true);
+
   const [suggestion, setSuggestion] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const [savedTitle, setSavedTitle] = useState(initialTitle);
   const [savedBody, setSavedBody] = useState(initialBody);
@@ -89,10 +74,30 @@ export function EditorWorkspace({
     }
   }
 
-  function requestSuggestion() {
-    const pool = SUGGESTIONS[type];
-    const next = pool[Math.floor(Math.random() * pool.length)];
-    setSuggestion(next);
+  async function requestSuggestion() {
+    setIsGenerating(true);
+    setApiError(null);
+
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, title, body }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setApiError(data.error || "Failed to generate suggestion.");
+      } else {
+        setSuggestion(data.suggestion);
+      }
+    } catch (err) {
+      console.error("Client fetch error:", err);
+      setApiError("Network error: Could not reach the generation service.");
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   if (isLoaded && !isNew && !existingDraft) {
@@ -180,20 +185,32 @@ export function EditorWorkspace({
         {panelOpen && (
           <div className="mt-4">
             <p className="text-ink-soft text-xs leading-relaxed">
-              Placeholder panel — wire this up to a real model call in the Build
-              phase.
+              Powered by Gemini — asks the model for content-specific feedback
+              tailored to your format.
             </p>
             <button
               type="button"
               onClick={requestSuggestion}
-              className="bg-ink text-paper hover:bg-teal mt-4 w-full rounded-md px-3 py-2 text-sm font-medium transition-colors"
+              disabled={isGenerating}
+              className="bg-ink text-paper hover:bg-teal disabled:opacity-50 mt-4 w-full rounded-md px-3 py-2 text-sm font-medium transition-colors"
             >
-              Suggest an edit
+              {isGenerating ? "Generating suggestion…" : "Suggest an edit"}
             </button>
-            {suggestion && (
-              <p className="border-teal/40 bg-paper-raised mt-4 rounded-md border-l-4 p-3 text-sm leading-relaxed">
+
+            {apiError && (
+              <div className="border-danger/40 bg-paper-raised text-danger mt-4 rounded-md border-l-4 p-3 text-xs leading-relaxed">
+                <span className="font-semibold block mb-0.5">Error:</span>
+                {apiError}
+              </div>
+            )}
+
+            {suggestion && !apiError && (
+              <div className="border-teal/40 bg-paper-raised mt-4 rounded-md border-l-4 p-3 text-sm leading-relaxed">
+                <span className="text-teal font-mono block mb-1 text-[11px] uppercase font-medium">
+                  Gemini suggestion:
+                </span>
                 {suggestion}
-              </p>
+              </div>
             )}
           </div>
         )}
@@ -201,4 +218,5 @@ export function EditorWorkspace({
     </div>
   );
 }
+
 
