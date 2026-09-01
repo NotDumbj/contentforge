@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useDrafts } from "@/lib/use-drafts";
 import type { DraftType } from "@/lib/drafts";
 
 const SUGGESTIONS: Record<DraftType, string[]> = {
@@ -22,20 +24,70 @@ const SUGGESTIONS: Record<DraftType, string[]> = {
 };
 
 export function EditorWorkspace({
+  draftId,
   type,
-  initialTitle,
-  initialBody,
+  initialTitle = "",
+  initialBody = "",
 }: {
+  draftId?: string;
   type: DraftType;
-  initialTitle: string;
-  initialBody: string;
+  initialTitle?: string;
+  initialBody?: string;
 }) {
+  const router = useRouter();
+  const { drafts, createDraft, updateDraft, isLoaded } = useDrafts();
+
+  const isNew = !draftId || draftId.startsWith("new-");
+  const existingDraft = !isNew ? drafts.find((d) => d.id === draftId) : undefined;
+
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState(initialBody);
   const [panelOpen, setPanelOpen] = useState(true);
   const [suggestion, setSuggestion] = useState<string | null>(null);
 
+  const [savedTitle, setSavedTitle] = useState(initialTitle);
+  const [savedBody, setSavedBody] = useState(initialBody);
+
+  useEffect(() => {
+    if (isLoaded && existingDraft) {
+      const loadedBody = existingDraft.body ?? existingDraft.excerpt ?? "";
+      setTitle(existingDraft.title);
+      setBody(loadedBody);
+      setSavedTitle(existingDraft.title);
+      setSavedBody(loadedBody);
+    }
+  }, [isLoaded, existingDraft]);
+
   const wordCount = body.trim().length === 0 ? 0 : body.trim().split(/\s+/).length;
+  const isDirty = title !== savedTitle || body !== savedBody;
+
+  function handleSave() {
+    const trimmedTitle = title.trim() || "Untitled draft";
+    const excerpt = body.trim().slice(0, 120) || trimmedTitle;
+
+    if (isNew) {
+      const created = createDraft({
+        title: trimmedTitle,
+        type,
+        body,
+        excerpt,
+        wordCount,
+        status: "drafting",
+      });
+      setSavedTitle(created.title);
+      setSavedBody(created.body ?? body);
+      router.push(`/editor/${created.id}`);
+    } else if (draftId) {
+      updateDraft(draftId, {
+        title: trimmedTitle,
+        body,
+        excerpt,
+        wordCount,
+      });
+      setSavedTitle(title);
+      setSavedBody(body);
+    }
+  }
 
   function requestSuggestion() {
     const pool = SUGGESTIONS[type];
@@ -43,10 +95,52 @@ export function EditorWorkspace({
     setSuggestion(next);
   }
 
+  if (isLoaded && !isNew && !existingDraft) {
+    return (
+      <div className="border-line bg-paper-raised rounded-lg border p-8 text-center">
+        <h2 className="font-display text-xl font-semibold">Draft not found</h2>
+        <p className="text-ink-soft mt-2 text-sm">
+          This draft may have been deleted or does not exist in local storage.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="bg-ink text-paper hover:bg-teal mt-4 rounded-md px-4 py-2 text-sm font-medium transition-colors"
+        >
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       {/* Draft pane */}
       <div className="min-w-0 flex-1">
+        {/* Status bar and Save action */}
+        <div className="border-line bg-paper-raised mb-4 flex items-center justify-between rounded-lg border px-4 py-2.5">
+          <div className="flex items-center gap-2 font-mono text-xs">
+            <span
+              className={`h-2.5 w-2.5 rounded-full transition-colors ${
+                isDirty ? "bg-highlight" : "bg-teal"
+              }`}
+              aria-hidden
+            />
+            <span className="text-ink-soft font-medium">
+              {isDirty ? "Unsaved changes" : "Saved"}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!isDirty && !isNew}
+            className="bg-ink text-paper hover:bg-teal disabled:opacity-40 disabled:hover:bg-ink rounded-md px-4 py-1.5 text-sm font-medium transition-colors"
+          >
+            {isNew ? "Save draft" : "Save"}
+          </button>
+        </div>
+
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -68,7 +162,7 @@ export function EditorWorkspace({
 
       {/* AI assist panel */}
       <aside
-        className="border-line bg-highlight-soft w-full shrink-0 rounded-lg border p-5 lg:w-72"
+        className="border-line bg-highlight-soft h-fit w-full shrink-0 rounded-lg border p-5 lg:w-72"
         aria-label="AI assist panel"
       >
         <div className="flex items-center justify-between">
@@ -107,3 +201,4 @@ export function EditorWorkspace({
     </div>
   );
 }
+

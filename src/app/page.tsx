@@ -1,8 +1,11 @@
+"use client";
+
 import Link from "next/link";
-import { drafts } from "@/lib/drafts";
+import { useDrafts } from "@/lib/use-drafts";
 import { DraftCard } from "@/components/draft-card";
 
 export default function DashboardPage() {
+  const { drafts, deleteDraft, isLoaded } = useDrafts();
   const inProgress = drafts.filter((d) => d.status !== "published").length;
 
   return (
@@ -16,7 +19,11 @@ export default function DashboardPage() {
             Your drafts
           </h1>
           <p className="text-ink-soft mt-2 text-sm">
-            {inProgress} draft{inProgress === 1 ? "" : "s"} in progress
+            {isLoaded ? (
+              `${inProgress} draft${inProgress === 1 ? "" : "s"} in progress`
+            ) : (
+              "Loading drafts…"
+            )}
           </p>
         </div>
         <Link
@@ -27,11 +34,24 @@ export default function DashboardPage() {
         </Link>
       </header>
 
-      <div className="grid gap-6 pt-2 sm:grid-cols-2">
-        {drafts.map((draft) => (
-          <DraftCard key={draft.id} draft={draft} />
-        ))}
-      </div>
+      {drafts.length === 0 ? (
+        <div className="border-line bg-paper-raised rounded-lg border p-8 text-center">
+          <p className="text-ink-soft text-sm">No drafts yet.</p>
+          <Link
+            href="/editor/new"
+            className="text-teal mt-2 inline-block font-mono text-xs underline"
+          >
+            Create your first draft →
+          </Link>
+        </div>
+      ) : (
+        <div className="grid gap-6 pt-2 sm:grid-cols-2">
+          {drafts.map((draft) => (
+            <DraftCard key={draft.id} draft={draft} onDelete={deleteDraft} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+

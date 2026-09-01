@@ -19,21 +19,21 @@ export default async function EditorPage({
     return (
       <div className="mx-auto max-w-5xl">
         <Breadcrumb label={`New ${TYPE_LABEL[type].toLowerCase()}`} />
-        <EditorWorkspace type={type} initialTitle="" initialBody="" />
+        <EditorWorkspace draftId={id} type={type} initialTitle="" initialBody="" />
       </div>
     );
   }
 
   const draft = getDraft(id);
-  if (!draft) notFound();
 
   return (
     <div className="mx-auto max-w-5xl">
-      <Breadcrumb label={draft.title} />
+      <Breadcrumb label={draft ? draft.title : "Edit draft"} />
       <EditorWorkspace
-        type={draft.type}
-        initialTitle={draft.title}
-        initialBody={draft.excerpt}
+        draftId={id}
+        type={draft?.type ?? "blog"}
+        initialTitle={draft?.title ?? ""}
+        initialBody={draft?.body ?? draft?.excerpt ?? ""}
       />
     </div>
   );
