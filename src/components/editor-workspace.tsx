@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDrafts } from "@/lib/use-drafts";
 import type { DraftType } from "@/lib/drafts";
@@ -30,18 +30,18 @@ export function EditorWorkspace({
   const [isGenerating, setIsGenerating] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  const [loadedDraftId, setLoadedDraftId] = useState<string | null>(null);
   const [savedTitle, setSavedTitle] = useState(initialTitle);
   const [savedBody, setSavedBody] = useState(initialBody);
 
-  useEffect(() => {
-    if (isLoaded && existingDraft) {
-      const loadedBody = existingDraft.body ?? existingDraft.excerpt ?? "";
-      setTitle(existingDraft.title);
-      setBody(loadedBody);
-      setSavedTitle(existingDraft.title);
-      setSavedBody(loadedBody);
-    }
-  }, [isLoaded, existingDraft]);
+  if (isLoaded && existingDraft && existingDraft.id !== loadedDraftId) {
+    setLoadedDraftId(existingDraft.id);
+    const loadedBody = existingDraft.body ?? existingDraft.excerpt ?? "";
+    setTitle(existingDraft.title);
+    setBody(loadedBody);
+    setSavedTitle(existingDraft.title);
+    setSavedBody(loadedBody);
+  }
 
   const wordCount = body.trim().length === 0 ? 0 : body.trim().split(/\s+/).length;
   const isDirty = title !== savedTitle || body !== savedBody;

@@ -3,26 +3,43 @@
 // NOTE: Currently using browser-only client-side persistence (localStorage).
 // A real database / backend API integration is a future step.
 
-import { useState, useEffect, useCallback } from "react";
+import { useSyncExternalStore, useCallback } from "react";
 import { INITIAL_DRAFTS, type Draft } from "./drafts";
 
 const STORAGE_KEY = "contentforge:drafts";
 const SYNC_EVENT = "contentforge:drafts-updated";
 
-function getStoredDrafts(): Draft[] {
-  if (typeof window === "undefined") {
-    return INITIAL_DRAFTS;
-  }
+function subscribe(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener(SYNC_EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    window.removeEventListener(SYNC_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+function getStoredDraftsRaw(): string {
+  if (typeof window === "undefined") return "";
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DRAFTS));
-      return INITIAL_DRAFTS;
+    if (raw === null) {
+      const initialJson = JSON.stringify(INITIAL_DRAFTS);
+      localStorage.setItem(STORAGE_KEY, initialJson);
+      return initialJson;
     }
+    return raw;
+  } catch {
+    return "";
+  }
+}
+
+function parseDrafts(raw: string): Draft[] {
+  if (!raw) return INITIAL_DRAFTS;
+  try {
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed : INITIAL_DRAFTS;
-  } catch (error) {
-    console.error("Failed to read drafts from localStorage:", error);
+  } catch {
     return INITIAL_DRAFTS;
   }
 }
@@ -38,26 +55,9 @@ function saveStoredDrafts(nextDrafts: Draft[]): void {
 }
 
 export function useDrafts() {
-  const [drafts, setDrafts] = useState<Draft[]>(() => INITIAL_DRAFTS);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const refreshDrafts = useCallback(() => {
-    setDrafts(getStoredDrafts());
-  }, []);
-
-  useEffect(() => {
-    refreshDrafts();
-    setIsLoaded(true);
-
-    const handleSync = () => refreshDrafts();
-    window.addEventListener(SYNC_EVENT, handleSync);
-    window.addEventListener("storage", handleSync);
-
-    return () => {
-      window.removeEventListener(SYNC_EVENT, handleSync);
-      window.removeEventListener("storage", handleSync);
-    };
-  }, [refreshDrafts]);
+  const rawString = useSyncExternalStore(subscribe, getStoredDraftsRaw, () => "");
+  const drafts = parseDrafts(rawString);
+  const isLoaded = typeof window !== "undefined";
 
   const getDraft = useCallback(
     (id: string): Draft | undefined => {
@@ -68,7 +68,7 @@ export function useDrafts() {
 
   const createDraft = useCallback(
     (data: Omit<Draft, "id" | "updatedAt">): Draft => {
-      const current = getStoredDrafts();
+      const current = parseDrafts(getStoredDraftsRaw());
       const newDraft: Draft = {
         ...data,
         id: `d_${Date.now()}`,
@@ -76,14 +76,13 @@ export function useDrafts() {
       };
       const updated = [newDraft, ...current];
       saveStoredDrafts(updated);
-      setDrafts(updated);
       return newDraft;
     },
     []
   );
 
   const updateDraft = useCallback((id: string, updates: Partial<Draft>): void => {
-    const current = getStoredDrafts();
+    const current = parseDrafts(getStoredDraftsRaw());
     const updated = current.map((d) => {
       if (d.id !== id) return d;
       return {
@@ -93,14 +92,12 @@ export function useDrafts() {
       };
     });
     saveStoredDrafts(updated);
-    setDrafts(updated);
   }, []);
 
   const deleteDraft = useCallback((id: string): void => {
-    const current = getStoredDrafts();
+    const current = parseDrafts(getStoredDraftsRaw());
     const updated = current.filter((d) => d.id !== id);
     saveStoredDrafts(updated);
-    setDrafts(updated);
   }, []);
 
   return {
